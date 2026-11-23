@@ -1,0 +1,20 @@
+# Sageify B2B website — static Jekyll / GitHub Pages configuration
+# Set url to the verified published HTTPS domain after deployment.
+title: "Sageify | פלטפורמת אבחון, מיון והכוונה לארגונים"
+description: "Sageify מאפשרת לארגונים לבנות ולהפעיל תהליכי אבחון, מיון והכוונה מקצועיים, בהתאמה למטרות ולאוכלוסיות שלהם."
+lang: he
+source: docs
+theme: null
+markdown: kramdown
+highlighter: rouge
+url: ""
+baseurl: ""
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - docker-compose.yml
+  - README.md
+  - vendor
+  - node_modules
+  - .git
+plugins: []
