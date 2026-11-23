@@ -69,3 +69,10 @@
 .video-legal{font-size:12px;color:#708a9a;margin:19px 0 0}
 @media(max-width:900px){.video-intro{grid-template-columns:1fr;gap:20px}.btn-video-cta{justify-self:start}}
 @media(max-width:640px){.video-section .shell{width:calc(100% - 24px)}.video-intro{padding-inline:4px}.video-intro p{font-size:14px}.video-stage{padding:7px}.video-stage-foot{min-height:64px;gap:8px;padding:10px 7px 4px}.video-stage-foot>div{gap:8px}.video-stage-foot>div>span:last-child{font-size:10px}.video-stage-foot strong{font-size:12px}.video-stage-foot .video-badge{font-size:9px}.video-legal{padding-inline:4px}}
+
+/* EmailJS contact form: preserve existing design and accessible status messages. */
+.contact-honeypot{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important}
+.btn-submit:disabled{opacity:.7;cursor:wait;filter:saturate(.75)}
+.form-status:not(:empty){border-radius:7px;padding:10px 12px;line-height:1.7}
+.form-status.success{background:#e8f9ee;border:1px solid #a4e8c8;color:#006c52}
+.form-status.error{background:#fff0f1;border:1px solid #f2b9c1;color:#a32741}

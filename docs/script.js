@@ -79,56 +79,141 @@
     updateBuilder();
   }
 
-  // Optional secure lead integration. Define SAGEIFY_LEAD_ENDPOINT as a same-origin
-  // HTTPS POST handler in deployment configuration; do not submit to unknown third parties.
-  // Example: window.SAGEIFY_LEAD_ENDPOINT = '/api/contact';
-  // Expected successful HTTP 2xx. Backend must implement validation, rate limits,
-  // appropriate retention, consent logging, and anti-spam measures.
+  // Static GitHub Pages integration with EmailJS REST API.
+  // Only public EmailJS IDs are read from emailjs-config.js. Never store private
+  // keys, SMTP credentials, or the recipient email address in browser code.
   const form = document.getElementById('lead-form');
   const status = document.getElementById('form-status');
+  const emailJsUrl = 'https://api.emailjs.com/api/v1.0/email/send';
+  let isSending = false;
+
   function showStatus(message, kind) {
     if (!status) return;
     status.textContent = message;
     status.className = 'form-status ' + (kind || '');
   }
+
+  function clean(value, maxLength) {
+    return String(value || '').trim().slice(0, maxLength);
+  }
+
+  function emailJsConfig() {
+    const config = window.SAGEIFY_EMAILJS;
+    if (!config || typeof config !== 'object') return null;
+    const publicKey = clean(config.publicKey, 120);
+    const serviceId = clean(config.serviceId, 120);
+    const templateId = clean(config.templateId, 120);
+    // Reject missing or placeholder values; never pretend a form was sent.
+    if (![publicKey, serviceId, templateId].every(value =>
+      value && /^[a-zA-Z0-9_-]+$/.test(value) && !/(replace|your_|placeholder)/i.test(value)
+    )) return null;
+    return { publicKey, serviceId, templateId };
+  }
+
   if (form) {
     form.addEventListener('submit', async function (event) {
       event.preventDefault();
+      if (isSending) return;
+      showStatus('');
       if (!form.reportValidity()) return;
       const consent = document.getElementById('lead-consent');
       if (!consent || !consent.checked) {
-        showStatus('יש לאשר שימוש בפרטי הקשר לצורך המענה לפנייה.', 'error');
+        showStatus('יש לאשר שימוש בפרטי הקשר לצורך מענה לפנייה.', 'error');
         consent?.focus();
         return;
       }
-      const endpoint = window.SAGEIFY_LEAD_ENDPOINT;
-      if (typeof endpoint !== 'string' || !endpoint.startsWith('/') || endpoint.startsWith('//')) {
-        showStatus('מערכת תיאום ההדגמה עדיין אינה מחוברת. הפנייה לא נשלחה. יש לחבר כתובת שרת מאובטחת לפני פרסום האתר.', 'error');
+      // A low-friction spam trap. The hidden field must remain empty.
+      const honeypot = document.getElementById('lead-website');
+      if (honeypot && honeypot.value) {
+        showStatus('לא ניתן לשלוח את הטופס. אנא רעננו את העמוד ונסו שוב.', 'error');
         return;
       }
+      const config = emailJsConfig();
+      if (!config) {
+        showStatus('שליחת הפניות אינה מוגדרת עדיין. הפנייה לא נשלחה. יש להגדיר את EmailJS באתר.', 'error');
+        return;
+      }
+
+      const fields = new FormData(form);
+      const name = clean(fields.get('name'), 120);
+      const organization = clean(fields.get('organization'), 150);
+      const role = clean(fields.get('role'), 120);
+      const email = clean(fields.get('email'), 250);
+      const phone = clean(fields.get('phone'), 35);
+      const interestCode = clean(fields.get('interest'), 60);
+      const interestSelect = document.getElementById('lead-interest');
+      const interestLabel = interestSelect && interestSelect.selectedOptions.length
+        ? clean(interestSelect.selectedOptions[0].textContent, 120)
+        : interestCode;
+      const dateTime = new Date().toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' });
+      // Keep the email recipient fixed inside the EmailJS template's "To Email"
+      // setting. Never accept or send recipient addresses from the public form.
+      const params = {
+        from_name: name,
+        name,
+        organization,
+        role: role || 'לא צוין',
+        from_email: email,
+        reply_to: email,
+        email,
+        phone: phone || 'לא צוין',
+        interest: interestLabel,
+        interest_code: interestCode,
+        submitted_at: dateTime,
+        page_url: window.location.href.slice(0, 500),
+        consent: 'אושר לצורך מענה לפנייה',
+        message: [
+          'פנייה חדשה לתיאום הדגמה באתר Sageify',
+          'שם: ' + name,
+          'ארגון: ' + organization,
+          'תפקיד: ' + (role || 'לא צוין'),
+          'מייל: ' + email,
+          'טלפון: ' + (phone || 'לא צוין'),
+          'תחום עניין: ' + interestLabel,
+          'זמן הפנייה: ' + dateTime
+        ].join('\n')
+      };
+
       const button = form.querySelector('button[type="submit"]');
-      const payload = Object.fromEntries(new FormData(form).entries());
-      payload.consent = true;
-      payload.source = 'sageify-website';
-      const previousText = button.textContent;
+      if (!button) return;
+      const originalHtml = button.innerHTML;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000);
+      isSending = true;
       button.disabled = true;
-      button.textContent = 'שולח פנייה…';
+      form.setAttribute('aria-busy', 'true');
+      button.textContent = 'שולח את הפנייה…';
       showStatus('שולח את הפנייה…');
       try {
-        const response = await fetch(endpoint, {
+        const response = await fetch(emailJsUrl, {
           method: 'POST',
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify(payload)
+          mode: 'cors',
+          credentials: 'omit',
+          cache: 'no-store',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            service_id: config.serviceId,
+            template_id: config.templateId,
+            user_id: config.publicKey,
+            template_params: params
+          })
         });
-        if (!response.ok) throw new Error('Request not accepted');
-        showStatus('הפנייה נשלחה בהצלחה. נחזור אליכם בהקדם.', 'success');
+        if (!response.ok) throw new Error('EmailJS request failed: ' + response.status);
+        showStatus('הפנייה נשלחה בהצלחה! ניצור איתכם קשר בהקדם.', 'success');
         form.reset();
-      } catch (_error) {
-        showStatus('לא ניתן היה לשלוח את הפנייה. בדקו את החיבור ונסו שוב.', 'error');
+      } catch (error) {
+        if (error && error.name === 'AbortError') {
+          showStatus('לא התקבל אישור משלוח. ייתכן שהפנייה נשלחה; מומלץ לבדוק לפני ניסיון נוסף.', 'error');
+        } else {
+          showStatus('לא הצלחנו לשלוח את הפנייה. הפרטים נשארו בטופס כדי שתוכלו לנסות שוב.', 'error');
+        }
       } finally {
+        clearTimeout(timeout);
+        isSending = false;
+        form.removeAttribute('aria-busy');
         button.disabled = false;
-        button.textContent = previousText;
+        button.innerHTML = originalHtml;
       }
     });
   }
