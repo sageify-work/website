@@ -130,7 +130,7 @@
       }
       const config = emailJsConfig();
       if (!config) {
-        showStatus('שליחת הפניות אינה מוגדרת עדיין. הפנייה לא נשלחה. יש להגדיר את EmailJS באתר.', 'error');
+        showStatus('שליחת הפניות אינה זמינה כרגע. נסו שוב מאוחר יותר או צרו קשר ישירות.', 'error');
         return;
       }
 
