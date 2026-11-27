@@ -7,8 +7,8 @@ source: docs
 theme: null
 markdown: kramdown
 highlighter: rouge
-url: ""
-baseurl: ""
+url: "https://sageify.work"
+baseurl: "https://sageify.work"
 exclude:
   - Gemfile
   - Gemfile.lock

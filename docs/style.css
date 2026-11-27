@@ -101,3 +101,63 @@
 }
 @media(max-width:380px){.hero-video-sublabel{display:none}}
 @media(prefers-reduced-motion:reduce){.hero-video-link{transition:none}}
+
+/* English + Hebrew language navigation. The two static pages share one visual system. */
+.lang-switch{display:inline-flex;align-items:center;gap:2px;flex-shrink:0;border:1px solid #d7e6ee;background:#f5fafc;padding:3px;border-radius:9px;direction:ltr}
+.lang-switch a{display:grid;place-items:center;min-height:34px;padding:6px 9px;border-radius:6px;text-decoration:none;color:#456078;font-weight:850;font-size:12px;line-height:1.2;white-space:nowrap}
+.lang-switch a:hover{color:var(--navy);background:#e7f3f5}
+.lang-switch a[aria-current="page"]{background:var(--navy);color:#fff;box-shadow:0 2px 5px rgba(0,0,73,.14)}
+.lang-switch a:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+html[dir="ltr"] body{direction:ltr}
+html[dir="ltr"] .skip-link{left:15px;right:auto}
+html[dir="ltr"] .screen-breadcrumb{margin-left:7px;margin-right:0}
+html[dir="ltr"] .screen-sidebar{border-right:1px solid var(--line);border-left:0}
+html[dir="ltr"] .screen-sidebar .side-active{border-left:3px solid #26df95;border-right:0}
+html[dir="ltr"] .check-list li{padding-left:28px;padding-right:0}
+html[dir="ltr"] .check-list li::before{left:0;right:auto}
+html[dir="ltr"] .widget-header .widget-live{margin-left:auto;margin-right:0}
+html[dir="ltr"] .widget-header small{text-align:left}
+html[dir="ltr"] .population-ethics{border-left:4px solid #24c7a4;border-right:0}
+html[dir="ltr"] .product-screen{transform:perspective(1200px) rotateY(4deg) rotateX(2deg)}
+html[dir="ltr"] .pillar-card::before{left:0;right:auto}
+html[dir="ltr"] .hero-video-play{padding-left:1px}
+html[dir="ltr"] .result-head{min-width:0}
+html[dir="ltr"] .result-head>div{min-width:0}
+html[dir="ltr"] .builder-result strong{overflow-wrap:anywhere}
+html[dir="ltr"] .brand-word{direction:ltr}
+html[dir="ltr"] .main-nav>a.nav-cta{margin-inline-start:0}
+html[dir="ltr"] .white-screen-foot{direction:ltr}
+html[dir="ltr"] .field input[type="email"],html[dir="ltr"] .field input[type="tel"]{direction:ltr;text-align:left}
+@media (max-width:1150px){.nav-inner{gap:14px}.main-nav{gap:10px}.main-nav>a{font-size:12px}.lang-switch a{padding:6px 7px}}
+@media (max-width:900px){
+  .nav-inner{gap:12px}
+  .nav-inner .menu-toggle{margin-inline-start:0}
+  .nav-inner .lang-switch{margin-inline-start:auto}
+  .main-nav{width:100%}
+}
+@media (max-width:640px){
+  .nav-inner{gap:8px}
+  .lang-switch{gap:1px;padding:2px;border-radius:7px}
+  .lang-switch a{font-size:11px;min-height:30px;padding:5px 7px}
+  .nav-inner .brand{gap:4px}
+  .nav-inner .brand-word{font-size:clamp(18px,5.5vw,25px)}
+  .nav-inner .brand-word small{font-size:7px;letter-spacing:1.2px}
+  .nav-inner .brand-symbol{width:34px;height:38px}
+  .nav-inner .brand-symbol img{width:30px;height:35px}
+  .nav-inner .menu-toggle{width:40px;height:40px;padding:10px}
+  html[dir="ltr"] .hero h1{font-size:clamp(36px,9vw,52px);overflow-wrap:break-word}
+  html[dir="ltr"] .hero-lead{line-height:1.75}
+  html[dir="ltr"] .proof-number span{max-width:135px}
+  html[dir="ltr"] .proof-inner{flex-wrap:wrap;padding-block:18px;gap:10px}
+  html[dir="ltr"] .proof-inner>p{flex:1;min-width:125px}
+}
+@media (max-width:360px){.nav-inner .brand-word{font-size:18px}.nav-inner .brand-symbol{width:28px}.lang-switch a{padding:4px 5px}}
+/* Keep language controls usable on the accessibility page's compact header. */
+@media (max-width:900px){.accessibility-body .nav-inner>.btn{display:none}}
+/* Avoid squeezing the usage stat and the explanatory copy into a single mobile row. */
+@media (max-width:640px){
+  .proof-inner,html[dir="ltr"] .proof-inner{flex-direction:column;align-items:flex-start;justify-content:center;padding-block:22px;gap:13px}
+  .proof-inner>p,html[dir="ltr"] .proof-inner>p{flex:none;min-width:0;max-width:100%}
+  .proof-number,html[dir="ltr"] .proof-number{width:100%;justify-content:flex-start;gap:15px}
+  .proof-number span,html[dir="ltr"] .proof-number span{max-width:unset;min-width:0}
+}
